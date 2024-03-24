@@ -112,7 +112,7 @@ class TasksManager {
             std::getline(std::cin, taskDescription);
             Task task(taskDescription);
             Tasks.push_back(task);
-            std::cout << "\n";
+            std::cout << "Task added successfully" << "\n";
         }
 
         //This method shows the user each created task, and then asks for the
@@ -144,7 +144,7 @@ class TasksManager {
             advance(it, taskToDelete);
             Tasks.erase(it);
 
-            std::cout << "\n";
+            std::cout << "Task removed successfully" << "\n";
         }
 
         //This method shows the user the list of tasks and asks the user which task they completed,
