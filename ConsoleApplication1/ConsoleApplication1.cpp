@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <list>
-
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 class Task {
     public:
@@ -31,6 +33,25 @@ class Task {
             }
             
         }
+
+        //This method returns a string representation to save in the text file
+        //the string consists of the description of the task and the completion
+        //status separated by the delimiter '|'
+        std::string getStringRepresentation() {
+
+            std::string representation;
+
+            if (completed == true)
+            {
+                representation = description+ "|Completed\n";
+            }
+            else
+            {
+                representation = description + "|Pending\n";
+            }
+
+            return representation;
+        }
     private:
         //This are the variables of the class, these variables save the description
         //and the completion status of the object.
@@ -58,7 +79,9 @@ class TasksManager {
                 std::cout << "2. Remove task" << "\n";
                 std::cout << "3. Complete task" << "\n";
                 std::cout << "4. View tasks" << "\n";
-                std::cout << "5. Exit the program" << "\n";
+                std::cout << "5. Save tasks to a file" << "\n";
+                std::cout << "6. Load tasks from a file" << "\n";
+                std::cout << "7. Exit the program" << "\n";
 
                 //These lines of code get input from the user using the
                 //getline() method and then parses it to int using the stoi method
@@ -86,6 +109,14 @@ class TasksManager {
                     ViewTasks();
                 }
                 else if (menuOption == 5)
+                {
+                    SaveTasks();
+                }
+                else if (menuOption == 6)
+                {
+                    LoadTasks();
+                }
+                else if (menuOption == 7)
                 {
                     //Once the user selects the option to exit, the program will break
                     //out of the loop
@@ -191,6 +222,97 @@ class TasksManager {
                 i++;
             }
             std::cout << "\n";
+        }
+
+        //The SaveTasks method asks the user for a filename and then saves the
+        //tasks to a text file.
+        void SaveTasks() {
+
+            std::fstream file;
+            std::string filename;
+
+            //First the program asks the user the filename where they want to save the tasks
+            std::cout << "Please enter the filename of your tasks file: ";
+
+            //After this, the program gets the filename using getline() and saving the data in the filename string
+            std::getline(std::cin, filename);
+
+            //Then using the filename, the program opens the file using an fstream in write mode.
+            file.open(filename, std::ios::out);
+
+            //While the file is open, the program will use a for loop for each task in the Tasks list
+            //and each task using the getStringRepresentation method.
+            if (file.is_open())
+            {
+                for (auto it : Tasks)
+                {
+                    file << it.getStringRepresentation();
+                }
+                std::cout << "File saved successfully in " + filename << "\n";
+                file.close();
+            }
+        }
+
+        //This LoadTasks method, gets the data from a text file and adds each task in the file
+        //to the Tasks list.
+        void LoadTasks() {
+
+            std::string filename;
+            std::fstream file;
+
+            //First the program asks the user the filename where they want to load the tasks
+            std::cout << "Please enter the filename of your tasks file: ";
+
+            //After this, the program gets the filename using getline() and saving the data in the filename string
+            std::getline(std::cin, filename);
+
+            //Then using the filename, the program opens the file using an fstream in read mode.
+            file.open(filename, std::ios::in);
+
+            //While the file is open, the program will use a while loop that checks every line in the
+            //text file to create a new Task object to add to the list of tasks.
+            if (file.is_open()) {
+
+                //First I created a variable named line to save each line of text
+                std::string line;
+
+                //Then using a while loop, the program reads each line of the text file
+                while (std::getline(file, line)) {
+
+                    //Then I declare the items that will help me to split the strings
+                    //into the description and the completed status of the task.
+                    std::stringstream ss(line);
+                    std::string part;
+                    std::vector<std::string> parts;
+                    char delimiter = '|';
+
+                    //As each line in the text file consist in the description of the task
+                    //and the completed status separated by the delimiter '|' I use a while
+                    //loop to split the string and add it to the parts vector
+                    while (std::getline(ss,part,delimiter))
+                    {
+                        parts.push_back(part);
+                    }
+
+                    //After the while loop the parts vector will consist on 2 strings,
+                    //the first one is the description of the task, and I use the first
+                    //part of the vector to create a Task object using the description in the text line.
+                    Task task(parts[0]);
+
+                    //After this, this if will check if the task is completed or not, and if it is
+                    //completed it will use the completeTask() method
+                    if (parts[1] == "Completed")
+                    {
+                        task.completeTask();
+                    }
+
+                    //Finally the task object is added to the Tasks list
+                    Tasks.push_back(task);
+                }
+
+                std::cout << "File loaded successfully" << "\n";
+                file.close();
+            }
         }
 };
 
